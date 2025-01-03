@@ -1,4 +1,5 @@
 import fs from "fs"
+import { DB, Person } from "./types"
 
 export function writeToDB(persons: Person[]) {
     const dbPath = "./db.json"

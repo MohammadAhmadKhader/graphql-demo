@@ -1,7 +1,9 @@
+import { Order } from './../types.d';
 import { faker } from "@faker-js/faker"
 import db from "../db.json" with { type: "json" }
 import { updatePerson, addNewPerson } from "../utils.js"
 import {GraphQLResolveInfo} from "graphql"
+import { Resolvers } from "../types"
 
 const AVAILABLE = "AVAILABLE"
 const NOT_AVAILABLE = "NOT_AVAILABLE"
@@ -15,9 +17,9 @@ const spaces = [{
     status: NOT_AVAILABLE
 }]
 
-const resolvers = {
+const resolvers: Resolvers = {
     Developer: {
-        metadata(parent: any){
+        metadata(parent){
             return {emptyByOverride:true}
         }
     },
@@ -32,10 +34,7 @@ const resolvers = {
         }
     },
     Human: {
-        __resolveType:(person: any, context: any, info: GraphQLResolveInfo) =>{
-            console.log(context)
-            context.data = 2
-            
+        __resolveType:(person: any, context: any, info: GraphQLResolveInfo) =>{ 
             if(person.email && typeof person.email?.length === "number") {
                 return "Person"
             }
@@ -59,23 +58,25 @@ const resolvers = {
                 salary: faker.number.float({min: 500, max: 5000, fractionDigits: 4})
             }
         },
-        persons: (parent: any, {page, pageSize}: {page:number, pageSize:number}, context: any, info: GraphQLResolveInfo) =>{
+        persons: (parent, {page, pageSize}: {page:number, pageSize:number}, context, info: GraphQLResolveInfo) =>{
             const limit = page * pageSize
             const slice = db.persons.slice((page - 1) * pageSize, limit)
     
             return slice
         },
-        person: (parent: any, { id }: {id: number})=>{
+        person: (parent, { id }: {id: number})=>{
             const person = db.persons.find((p)=>{
                 return p.id === id
             })
     
             return person
         },
-        spaces: ()=>{
+        spaces: (parent, args, context, info)=>{
+            console.log(context,"<- context from spaces")
             return spaces
         },
-        human: (parent: any, { id }:{id: number})=>{
+        human: (parent, { id }:{id: number}, context, info)=>{
+            console.log(context)
             // person implements human, so we can return person
             const person = db.persons.find((p)=>{
                 return p.id === Number(id)
@@ -83,13 +84,13 @@ const resolvers = {
     
             return person
         },
-        humans:(parent: any, {page, pageSize}: any, context: any, info: any) =>{
+        humans:(parent, {page, pageSize}, context, info) =>{
             const limit = page * pageSize
             const slice = db.persons.slice((page - 1) * pageSize, limit)
 
             return slice
         },
-        notPersons:(parent: any, {page, pageSize}: any, context: any, info: any) =>{
+        notPersons:(parent, {page, pageSize}, context, info) =>{
             const limit = page * pageSize
             const persons = db.notPersons.slice((page - 1) * pageSize, limit)
             const notPersons = db.persons.slice((page - 1) * pageSize, limit)
@@ -98,10 +99,10 @@ const resolvers = {
         },
     },
     Mutation: {
-        updatePerson: (parent: any, {id, data:{name, email, age}}: any) =>{
+        updatePerson: (parent, {id, data:{name, email, age}}) =>{
             return updatePerson(id, {name, email:[email], age})
         },
-        addPerson: (parent: any, {name, email, age}: any)=>{
+        addPerson: (parent, {name, email, age})=>{
             const person = {
                 name,
                 email:[email],

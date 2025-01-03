@@ -5,6 +5,7 @@ import { faker } from "@faker-js/faker"
 import db from "./db.json"
 import { readFileSync } from "fs"
 import { updatePerson, addNewPerson } from "./utils.js"
+import { Person } from "./types"
 
 const app = express()
 const filePath = "./schema.gql"
