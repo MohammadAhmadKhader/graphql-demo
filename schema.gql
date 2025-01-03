@@ -1,0 +1,69 @@
+input PersonInput {
+    name: String
+    email: String
+    age: Int
+}
+
+interface Human {
+    id: ID
+    name: String
+    age: Int
+}
+
+scalar JSON
+
+type Person implements Human {
+    id: ID
+    name: String
+    email: [String]
+    age: Int
+    isDeveloper: Boolean
+    orders: [Order]
+    metadata: JSON
+}
+
+type NotPerson implements Human {
+    id: ID
+    name: String
+    age: Int
+    type: String
+}
+
+type Developer {
+    profile: Person
+    salary: Float
+    metadata: JSON
+}
+
+type Query {
+    developer: Developer
+    persons(page: Int!, pageSize: Int!): [Person]
+    person(id: Int!): Person!
+    spaces: [Space]!
+    human(id: ID): Human!
+    humans(page: Int!, pageSize: Int!): [Human]
+    notPersons(page: Int!, pageSize: Int!): [Human]
+}
+
+type Mutation {
+    addPerson(data: PersonInput): Person!
+    updatePerson(id: Int!, data: PersonInput): Person
+}
+
+type Space {
+    status: Status
+}
+
+enum Status {
+    AVAILABLE
+    NOT_AVAILABLE
+}
+
+type Order {
+    id: ID!
+    personId: ID!
+    address: String
+    price: Float
+    itemId: ID!
+    items: Int
+}
